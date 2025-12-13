@@ -179,6 +179,7 @@ class PredictionRequest(BaseModel):
 class PredictionResponse(BaseModel):
     id: str
     patient_id: str
+    patient_name: Optional[str] = None
     event_probability: float
     risk_category: str
     confidence_lower: Optional[float] = None
@@ -584,6 +585,7 @@ async def create_prediction(
     return PredictionResponse(
         id=str(prediction.id),
         patient_id=str(prediction.patient_id),
+        patient_name=patient.name,
         event_probability=prediction.event_probability,
         risk_category=prediction.risk_category,
         confidence_lower=prediction.confidence_lower,
@@ -602,10 +604,13 @@ async def list_predictions(user: User = Depends(require_auth), db: DBSession = D
     else:
         predictions = db.query(Prediction).filter(Prediction.user_id == user.id).order_by(Prediction.created_at.desc()).all()
     
-    return [
-        PredictionResponse(
+    result = []
+    for p in predictions:
+        patient = db.query(Patient).filter(Patient.id == p.patient_id).first()
+        result.append(PredictionResponse(
             id=str(p.id),
             patient_id=str(p.patient_id),
+            patient_name=patient.name if patient else "Unknown",
             event_probability=p.event_probability,
             risk_category=p.risk_category,
             confidence_lower=p.confidence_lower,
@@ -613,9 +618,8 @@ async def list_predictions(user: User = Depends(require_auth), db: DBSession = D
             reliability_score=p.reliability_score,
             top_risk_factors=p.top_risk_factors,
             created_at=p.created_at.isoformat()
-        )
-        for p in predictions
-    ]
+        ))
+    return result
 
 
 @app.get("/predictions/{prediction_id}", response_model=PredictionResponse, tags=["Predictions"])
@@ -633,9 +637,12 @@ async def get_prediction(
     if str(prediction.user_id) != str(user.id) and user.role != "admin":
         raise HTTPException(status_code=403, detail="Access denied")
     
+    patient = db.query(Patient).filter(Patient.id == prediction.patient_id).first()
+    
     return PredictionResponse(
         id=str(prediction.id),
         patient_id=str(prediction.patient_id),
+        patient_name=patient.name if patient else "Unknown",
         event_probability=prediction.event_probability,
         risk_category=prediction.risk_category,
         confidence_lower=prediction.confidence_lower,

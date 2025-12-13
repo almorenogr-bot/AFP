@@ -17,6 +17,94 @@ This system predicts the probability of 100-day survival post-hematopoietic cell
 
 ---
 
+## 👥 Use Cases
+
+```mermaid
+flowchart LR
+    subgraph Actors
+        PHY["👨‍⚕️ Physician"]
+        ADM["👤 Administrator"]
+    end
+    
+    subgraph System["HCT Prediction System"]
+        UC1["📝 Register Patient"]
+        UC2["🔮 Generate Prediction"]
+        UC3["📊 View Dashboard"]
+        UC4["📋 View Patient History"]
+        UC5["🗑️ Delete Patient/Prediction"]
+        UC6["🤖 Train ML Model"]
+        UC7["👥 Manage Users"]
+    end
+    
+    PHY --> UC1
+    PHY --> UC2
+    PHY --> UC3
+    PHY --> UC4
+    PHY --> UC5
+    
+    ADM --> UC3
+    ADM --> UC6
+    ADM --> UC7
+    ADM --> UC5
+```
+
+### Use Case Descriptions
+
+| Use Case | Actor | Description |
+|----------|-------|-------------|
+| **Register Patient** | Physician | Enter 60+ clinical variables across 7 form tabs |
+| **Generate Prediction** | Physician | Submit patient data to ML model, receive risk assessment |
+| **View Dashboard** | Both | See statistics, recent predictions, high-risk cases |
+| **View Patient History** | Physician | Access all patients and their prediction history |
+| **Delete Patient/Prediction** | Both | Remove patient records or specific predictions |
+| **Train ML Model** | Admin | Retrain model with updated data |
+| **Manage Users** | Admin | Create, modify, deactivate user accounts |
+
+---
+
+## 🔄 User Flow
+
+```mermaid
+flowchart TD
+    START([User Access]) --> LOGIN{Authenticated?}
+    LOGIN -->|No| REGISTER[Register/Login]
+    REGISTER --> LOGIN
+    LOGIN -->|Yes| DASHBOARD[Dashboard]
+    
+    DASHBOARD --> NEW[New Prediction]
+    DASHBOARD --> HISTORY[View Patients]
+    DASHBOARD --> LOGOUT[Logout]
+    
+    NEW --> TAB1[Tab 1: Demographics]
+    TAB1 --> TAB2[Tab 2: Donor Info]
+    TAB2 --> TAB3[Tab 3: Disease]
+    TAB3 --> TAB4[Tab 4: Transplant]
+    TAB4 --> TAB5[Tab 5: HLA Matching]
+    TAB5 --> TAB6[Tab 6: Performance]
+    TAB6 --> TAB7[Tab 7: Comorbidities]
+    
+    TAB7 --> VALIDATE{Valid Data?}
+    VALIDATE -->|No| ERROR[Show Errors]
+    ERROR --> TAB1
+    VALIDATE -->|Yes| SUBMIT[Submit to AI]
+    
+    SUBMIT --> PROCESS[ML Pipeline Processing]
+    PROCESS --> RESULT[Display Results]
+    
+    RESULT --> GAUGE[Risk Gauge]
+    RESULT --> FACTORS[Top Risk Factors]
+    RESULT --> CONFIDENCE[Confidence Level]
+    RESULT --> RECOMMEND[Recommendations]
+    
+    RESULT --> DASHBOARD
+    
+    style RESULT fill:#4caf50,stroke:#333
+    style ERROR fill:#f44336,stroke:#333
+    style PROCESS fill:#ff9800,stroke:#333
+```
+
+---
+
 ## 🏗️ System Architecture
 
 ```mermaid
@@ -63,6 +151,44 @@ flowchart TB
 ## 🧠 Machine Learning Pipeline
 
 The system implements a 7-module architecture based on healthcare ML best practices:
+
+```mermaid
+flowchart LR
+    subgraph Input["📥 Input"]
+        DATA["Patient Data<br/>60+ variables"]
+    end
+    
+    subgraph Pipeline["🔬 ML Pipeline"]
+        M1["M1<br/>Preprocessing"]
+        M2["M2<br/>Equity Analysis"]
+        M3["M3<br/>Feature Selection"]
+        M4["M4<br/>Model Training"]
+        M5["M5<br/>Calibration"]
+        M6["M6<br/>Uncertainty"]
+        M7["M7<br/>Output"]
+    end
+    
+    subgraph Output["📤 Output"]
+        RISK["Risk Category"]
+        PROB["Probability %"]
+        CONF["Confidence Level"]
+        FACTORS["Risk Factors"]
+    end
+    
+    DATA --> M1 --> M2 --> M3 --> M4 --> M5 --> M6 --> M7
+    M7 --> RISK
+    M7 --> PROB
+    M7 --> CONF
+    M7 --> FACTORS
+    
+    style M1 fill:#e3f2fd,stroke:#1976d2
+    style M2 fill:#fce4ec,stroke:#c2185b
+    style M3 fill:#e8f5e9,stroke:#388e3c
+    style M4 fill:#fff3e0,stroke:#f57c00
+    style M5 fill:#f3e5f5,stroke:#7b1fa2
+    style M6 fill:#e0f7fa,stroke:#0097a7
+    style M7 fill:#fff8e1,stroke:#ffa000
+```
 
 ### M1: Data Preprocessing (`m1_preprocessing.py`)
 - **Function**: Data loading, validation, and imputation
@@ -187,6 +313,128 @@ The model uses **60+ variables** organized into categories:
 | `psych_disturb` | Psychiatric disturbance |
 | `rheum_issue` | Rheumatologic problem |
 | `vent_hist` | Mechanical ventilation history |
+
+---
+
+## 📖 Glossary of Medical Terms and Abbreviations
+
+Understanding the clinical terminology is essential for proper data entry. Below is a comprehensive glossary of all terms used in the system.
+
+### General Terms
+
+| Term | Full Name | Description |
+|------|-----------|-------------|
+| **HCT** | Hematopoietic Cell Transplant | Procedure to replace damaged bone marrow with healthy stem cells |
+| **CIBMTR** | Center for International Blood and Marrow Transplant Research | International research organization for transplant data |
+| **Allogeneic** | From another person | Transplant using donor cells |
+| **Autologous** | From self | Transplant using patient's own cells |
+
+### Primary Diseases
+
+| Abbreviation | Full Name | Description |
+|--------------|-----------|-------------|
+| **AML** | Acute Myeloid Leukemia | Cancer of myeloid cells in bone marrow; rapid onset |
+| **ALL** | Acute Lymphoblastic Leukemia | Cancer of lymphoid cells; common in children |
+| **MDS** | Myelodysplastic Syndrome | Bone marrow produces defective blood cells |
+| **CML** | Chronic Myeloid Leukemia | Slow-growing cancer of myeloid cells |
+| **CLL** | Chronic Lymphocytic Leukemia | Slow-growing cancer of lymphocytes |
+| **NHL** | Non-Hodgkin Lymphoma | Cancer of lymphatic system (various types) |
+| **HL** | Hodgkin Lymphoma | Lymphoma with Reed-Sternberg cells |
+| **MM** | Multiple Myeloma | Cancer of plasma cells in bone marrow |
+
+### Donor Types
+
+| Abbreviation | Full Name | Description |
+|--------------|-----------|-------------|
+| **MSD** | Matched Sibling Donor | Fully HLA-matched brother or sister |
+| **MUD** | Matched Unrelated Donor | HLA-matched donor from registry (non-family) |
+| **MMUD** | Mismatched Unrelated Donor | Partially matched unrelated donor |
+| **Haplo** | Haploidentical | Half-matched donor (parent, child, or sibling) |
+| **UCB** | Umbilical Cord Blood | Stem cells from umbilical cord |
+| **Auto** | Autologous | Patient's own cells (no donor) |
+
+### Conditioning Regimens
+
+| Abbreviation | Full Name | Description |
+|--------------|-----------|-------------|
+| **MAC** | Myeloablative Conditioning | High-dose chemo/radiation; destroys bone marrow completely |
+| **RIC** | Reduced Intensity Conditioning | Lower doses; relies more on immune effect |
+| **NMA** | Non-Myeloablative | Minimal doses; preserves some marrow function |
+| **TBI** | Total Body Irradiation | Radiation to entire body as part of conditioning |
+
+### Disease Risk and Status
+
+| Abbreviation | Full Name | Description |
+|--------------|-----------|-------------|
+| **DRI** | Disease Risk Index | Composite score predicting disease-related mortality |
+| **MRD** | Minimal Residual Disease | Small number of cancer cells remaining after treatment |
+| **CR** | Complete Remission | No detectable disease |
+| **PR** | Partial Remission | Disease reduced but still detectable |
+| **Cytogenetics** | Chromosome analysis | Study of chromosomal abnormalities in cancer cells |
+
+### HLA System
+
+| Term | Full Name | Description |
+|------|-----------|-------------|
+| **HLA** | Human Leukocyte Antigen | Proteins on cell surface used for immune recognition |
+| **HLA-A, B, C** | Class I antigens | Present on all nucleated cells |
+| **HLA-DR, DQ, DP** | Class II antigens | Present on immune cells |
+| **High Resolution** | Allele-level typing | Detailed genetic matching (4+ digits) |
+| **Match (0/1/2)** | Locus match score | 0=no match, 1=partial, 2=full match per locus |
+| **8/8 Match** | Full match at 8 loci | HLA-A, B, C, DRB1 fully matched (bilateral) |
+
+### GVHD Prophylaxis
+
+| Abbreviation | Full Name | Description |
+|--------------|-----------|-------------|
+| **GVHD** | Graft versus Host Disease | Donor cells attack patient's tissues |
+| **PTCy** | Post-Transplant Cyclophosphamide | Chemo given after transplant to prevent GVHD |
+| **MTX** | Methotrexate | Immunosuppressant drug |
+| **MMF** | Mycophenolate Mofetil | Immunosuppressant drug |
+| **CSA** | Cyclosporine A | Immunosuppressant drug |
+| **Tacrolimus** | FK506 | Potent immunosuppressant |
+
+### Performance and Comorbidity Scales
+
+| Scale | Range | Description |
+|-------|-------|-------------|
+| **Karnofsky Score** | 0-100 | Functional status (100=normal, 0=dead) |
+| **ECOG** | 0-5 | Performance status (0=fully active, 5=dead) |
+| **HCT-CI** | 0-10+ | Hematopoietic Cell Transplant Comorbidity Index (Sorror score) |
+
+#### Karnofsky Score Interpretation
+
+| Score | Meaning |
+|-------|---------|
+| 100 | Normal, no complaints |
+| 90 | Minor symptoms, normal activity |
+| 80 | Some symptoms, normal activity with effort |
+| 70 | Unable to work, cares for self |
+| 60 | Requires occasional assistance |
+| 50 | Requires considerable assistance |
+| 40 | Disabled, requires special care |
+| 30 | Severely disabled, hospitalized |
+| 20 | Very sick, active support needed |
+| 10 | Moribund |
+
+### Comorbidity Definitions
+
+| Comorbidity | Clinical Definition |
+|-------------|---------------------|
+| **Cardiac** | Coronary artery disease, CHF, MI, EF ≤50% |
+| **Arrhythmia** | Atrial fibrillation, flutter, sick sinus, ventricular arrhythmia |
+| **Diabetes** | Requiring insulin or oral hypoglycemics |
+| **Hepatic Mild** | Chronic hepatitis, bilirubin 1.5-3x normal, AST/ALT 2.5-5x |
+| **Hepatic Severe** | Cirrhosis, bilirubin >3x normal, AST/ALT >5x |
+| **Pulmonary Moderate** | DLCO or FEV1 66-80% |
+| **Pulmonary Severe** | DLCO or FEV1 ≤65%, dyspnea at rest, requires O2 |
+| **Renal** | Creatinine >2 mg/dL, on dialysis, prior transplant |
+| **Obesity** | BMI ≥35 kg/m² |
+| **Peptic Ulcer** | Requiring treatment |
+| **Prior Tumor** | Prior malignancy (excluding non-melanoma skin cancer) |
+| **Psychiatric** | Depression or anxiety requiring treatment |
+| **Rheumatologic** | SLE, RA, polymyositis, requiring treatment |
+| **Mechanical Ventilation** | History of prior mechanical ventilation |
 
 ---
 
@@ -437,6 +685,135 @@ python create_sample_cases.py
 2. **Updates**: Requires manual retraining with new data
 3. **Predictions**: Does not replace clinical judgment
 4. **Equity**: Calibration may vary by demographic group
+
+---
+
+## 🧪 Sample Clinical Cases
+
+Below are 5 representative clinical cases demonstrating different risk profiles:
+
+### Case 1: Young AML Patient - LOW RISK
+
+| Category | Field | Value |
+|----------|-------|-------|
+| **Demographics** | Age | 28 |
+| | Race | Hispanic/Latino |
+| **Donor** | Type | MSD (Matched Sibling) |
+| | Age | 30 |
+| | Sex Match | Matched |
+| **Disease** | Primary | AML |
+| | DRI Score | Low |
+| | Cytogenetics | Good |
+| | MRD | Negative |
+| **Transplant** | Conditioning | MAC |
+| | Graft | Peripheral Blood |
+| | TBI | No |
+| **HLA** | 8-locus match | 8/8 |
+| **Performance** | Karnofsky | 90 |
+| | Comorbidity Score | 1 |
+| **Comorbidities** | None | — |
+
+**Expected Risk**: ~18-25% mortality (LOW)
+
+---
+
+### Case 2: Elderly MDS Patient - HIGH RISK
+
+| Category | Field | Value |
+|----------|-------|-------|
+| **Demographics** | Age | 68 |
+| | Race | White |
+| **Donor** | Type | MUD (Unrelated) |
+| | Age | 55 |
+| | Sex Match | Mismatched |
+| **Disease** | Primary | MDS |
+| | DRI Score | High |
+| | Cytogenetics | Poor |
+| | MRD | Positive |
+| **Transplant** | Conditioning | RIC |
+| | Graft | Peripheral Blood |
+| | TBI | 200 cGy |
+| **HLA** | 8-locus match | 7/8 |
+| **Performance** | Karnofsky | 60 |
+| | Comorbidity Score | 5 |
+| **Comorbidities** | Cardiac, Diabetes, Pulmonary, Renal |
+
+**Expected Risk**: ~65-75% mortality (HIGH)
+
+---
+
+### Case 3: Pediatric ALL Patient - MEDIUM RISK
+
+| Category | Field | Value |
+|----------|-------|-------|
+| **Demographics** | Age | 12 |
+| | Race | Hispanic/Latino |
+| **Donor** | Type | Haploidentical |
+| | Age | 35 |
+| | Sex Match | Matched |
+| **Disease** | Primary | ALL |
+| | DRI Score | Intermediate |
+| | Cytogenetics | Intermediate |
+| | MRD | Negative |
+| **Transplant** | Conditioning | MAC |
+| | Graft | Bone Marrow |
+| | TBI | 1200 cGy |
+| **HLA** | 8-locus match | 5/8 |
+| **Performance** | Karnofsky | 100 |
+| | Comorbidity Score | 0 |
+| **Comorbidities** | None | — |
+
+**Expected Risk**: ~25-35% mortality (MEDIUM)
+
+---
+
+### Case 4: Autologous Myeloma Patient - LOW RISK
+
+| Category | Field | Value |
+|----------|-------|-------|
+| **Demographics** | Age | 55 |
+| | Race | Black/African American |
+| **Donor** | Type | Autologous (Self) |
+| | Age | 55 |
+| | Sex Match | N/A |
+| **Disease** | Primary | MM (Multiple Myeloma) |
+| | DRI Score | Low |
+| | Cytogenetics | Good |
+| | MRD | Negative |
+| **Transplant** | Conditioning | MAC |
+| | Graft | Peripheral Blood |
+| | TBI | No |
+| **HLA** | 8-locus match | 8/8 (self) |
+| **Performance** | Karnofsky | 80 |
+| | Comorbidity Score | 2 |
+| **Comorbidities** | Diabetes, Obesity |
+
+**Expected Risk**: ~15-22% mortality (LOW)
+
+---
+
+### Case 5: CML in Crisis - VERY HIGH RISK
+
+| Category | Field | Value |
+|----------|-------|-------|
+| **Demographics** | Age | 62 |
+| | Race | Asian |
+| **Donor** | Type | MUD (Unrelated) |
+| | Age | 42 |
+| | Sex Match | Mismatched |
+| **Disease** | Primary | CML |
+| | DRI Score | Very High |
+| | Cytogenetics | Very Poor |
+| | MRD | Positive |
+| **Transplant** | Conditioning | MAC |
+| | Graft | Peripheral Blood |
+| | TBI | 1200 cGy |
+| **HLA** | 8-locus match | 6/8 |
+| **Performance** | Karnofsky | 50 |
+| | Comorbidity Score | 7 |
+| **Comorbidities** | Cardiac, Arrhythmia, Hepatic, Pulmonary Severe, Renal, Prior Tumor |
+
+**Expected Risk**: ~75-85% mortality (VERY HIGH)
 
 ---
 

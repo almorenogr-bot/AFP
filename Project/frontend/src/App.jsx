@@ -1300,13 +1300,15 @@ function PatientsPage() {
         }
     }
 
-    const filteredPatients = patients.filter(p => 
-        p.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const filteredPatients = patients.filter(p => {
+        if (!searchTerm) return true
+        return p.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    })
 
-    const filteredPredictions = predictions.filter(p =>
-        p.patient_name?.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+    const filteredPredictions = predictions.filter(p => {
+        if (!searchTerm) return true
+        return (p.patient_name || '').toLowerCase().includes(searchTerm.toLowerCase())
+    })
 
     if (loading) {
         return (
@@ -1369,7 +1371,7 @@ function PatientsPage() {
                                         <div>
                                             <strong>{patient.name}</strong>
                                             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                                                Age: {patient.age_at_hct} | Karnofsky: {patient.karnofsky_score} | 
+                                                Age: {patient.clinical_data?.age_at_hct || 'N/A'} | Karnofsky: {patient.clinical_data?.karnofsky_score || 'N/A'} | 
                                                 Created: {new Date(patient.created_at).toLocaleDateString()}
                                             </div>
                                         </div>
