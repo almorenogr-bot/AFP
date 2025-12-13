@@ -786,7 +786,8 @@ function PredictPage() {
                     <div className="grid grid-2">
                         <div className="form-group">
                             <label className="form-label">Donor Age</label>
-                            <input type="number" name="donor_age" className="form-input" value={formData.donor_age} onChange={handleChange} min="0" max="120" placeholder="Years" />
+                            <input type="number" name="donor_age" className={`form-input ${validationErrors.donor_age ? 'input-error' : ''}`} value={formData.donor_age} onChange={handleChange} onKeyDown={handleKeyDown} min="0" max="120" placeholder="Years (0-120)" />
+                            {validationErrors.donor_age && <span className="error-text">{validationErrors.donor_age}</span>}
                         </div>
                         <div className="form-group">
                             <label className="form-label">Donor Relationship</label>
@@ -1011,7 +1012,8 @@ function PredictPage() {
                         </div>
                         <div className="form-group">
                             <label className="form-label">Sorror Comorbidity Score</label>
-                            <input type="number" name="comorbidity_score" className="form-input" value={formData.comorbidity_score} onChange={handleChange} min="0" max="10" placeholder="0-10" />
+                            <input type="number" name="comorbidity_score" className={`form-input ${validationErrors.comorbidity_score ? 'input-error' : ''}`} value={formData.comorbidity_score} onChange={handleChange} onKeyDown={handleKeyDown} min="0" max="10" placeholder="0-10" />
+                            {validationErrors.comorbidity_score && <span className="error-text">{validationErrors.comorbidity_score}</span>}
                             <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>0 = No comorbidities</small>
                         </div>
                     </div>
