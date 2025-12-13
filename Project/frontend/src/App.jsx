@@ -516,7 +516,15 @@ function PredictPage() {
         hla_match_c_high: { min: 0, max: 2 },
         hla_match_drb1_high: { min: 0, max: 2 },
         hla_match_dqb1_high: { min: 0, max: 2 },
-        hla_high_res_8: { min: 0, max: 8, integer: true }
+        hla_high_res_8: { min: 0, max: 8, integer: true },
+        hla_high_res_10: { min: 0, max: 10, integer: true },
+        hla_match_a_low: { min: 0, max: 2 },
+        hla_match_b_low: { min: 0, max: 2 },
+        hla_match_c_low: { min: 0, max: 2 },
+        hla_match_drb1_low: { min: 0, max: 2 },
+        hla_match_dqb1_low: { min: 0, max: 2 },
+        hla_low_res_8: { min: 0, max: 8, integer: true },
+        hla_nmdp_6: { min: 0, max: 6, integer: true }
     }
 
     const validateField = (name, value) => {
@@ -934,27 +942,33 @@ function PredictPage() {
                         <div className="grid grid-3">
                             <div className="form-group">
                                 <label className="form-label">HLA-A</label>
-                                <input type="number" name="hla_match_a_high" className="form-input" value={formData.hla_match_a_high} onChange={handleChange} step="0.5" min="0" max="2" placeholder="0-2" />
+                                <input type="number" name="hla_match_a_high" className={`form-input ${validationErrors.hla_match_a_high ? 'input-error' : ''}`} value={formData.hla_match_a_high} onChange={handleChange} onKeyDown={handleKeyDown} step="0.5" min="0" max="2" placeholder="0-2" />
+                                {validationErrors.hla_match_a_high && <span className="error-text">{validationErrors.hla_match_a_high}</span>}
                             </div>
                             <div className="form-group">
                                 <label className="form-label">HLA-B</label>
-                                <input type="number" name="hla_match_b_high" className="form-input" value={formData.hla_match_b_high} onChange={handleChange} step="0.5" min="0" max="2" placeholder="0-2" />
+                                <input type="number" name="hla_match_b_high" className={`form-input ${validationErrors.hla_match_b_high ? 'input-error' : ''}`} value={formData.hla_match_b_high} onChange={handleChange} onKeyDown={handleKeyDown} step="0.5" min="0" max="2" placeholder="0-2" />
+                                {validationErrors.hla_match_b_high && <span className="error-text">{validationErrors.hla_match_b_high}</span>}
                             </div>
                             <div className="form-group">
                                 <label className="form-label">HLA-C</label>
-                                <input type="number" name="hla_match_c_high" className="form-input" value={formData.hla_match_c_high} onChange={handleChange} step="0.5" min="0" max="2" placeholder="0-2" />
+                                <input type="number" name="hla_match_c_high" className={`form-input ${validationErrors.hla_match_c_high ? 'input-error' : ''}`} value={formData.hla_match_c_high} onChange={handleChange} onKeyDown={handleKeyDown} step="0.5" min="0" max="2" placeholder="0-2" />
+                                {validationErrors.hla_match_c_high && <span className="error-text">{validationErrors.hla_match_c_high}</span>}
                             </div>
                             <div className="form-group">
                                 <label className="form-label">HLA-DRB1</label>
-                                <input type="number" name="hla_match_drb1_high" className="form-input" value={formData.hla_match_drb1_high} onChange={handleChange} step="0.5" min="0" max="2" placeholder="0-2" />
+                                <input type="number" name="hla_match_drb1_high" className={`form-input ${validationErrors.hla_match_drb1_high ? 'input-error' : ''}`} value={formData.hla_match_drb1_high} onChange={handleChange} onKeyDown={handleKeyDown} step="0.5" min="0" max="2" placeholder="0-2" />
+                                {validationErrors.hla_match_drb1_high && <span className="error-text">{validationErrors.hla_match_drb1_high}</span>}
                             </div>
                             <div className="form-group">
                                 <label className="form-label">HLA-DQB1</label>
-                                <input type="number" name="hla_match_dqb1_high" className="form-input" value={formData.hla_match_dqb1_high} onChange={handleChange} step="0.5" min="0" max="2" placeholder="0-2" />
+                                <input type="number" name="hla_match_dqb1_high" className={`form-input ${validationErrors.hla_match_dqb1_high ? 'input-error' : ''}`} value={formData.hla_match_dqb1_high} onChange={handleChange} onKeyDown={handleKeyDown} step="0.5" min="0" max="2" placeholder="0-2" />
+                                {validationErrors.hla_match_dqb1_high && <span className="error-text">{validationErrors.hla_match_dqb1_high}</span>}
                             </div>
                             <div className="form-group">
                                 <label className="form-label">8-Locus Match</label>
-                                <input type="number" name="hla_high_res_8" className="form-input" value={formData.hla_high_res_8} onChange={handleChange} step="1" min="0" max="8" placeholder="0-8" />
+                                <input type="number" name="hla_high_res_8" className={`form-input ${validationErrors.hla_high_res_8 ? 'input-error' : ''}`} value={formData.hla_high_res_8} onChange={handleChange} onKeyDown={handleKeyDown} step="1" min="0" max="8" placeholder="0-8" />
+                                {validationErrors.hla_high_res_8 && <span className="error-text">{validationErrors.hla_high_res_8}</span>}
                             </div>
                         </div>
                         <h4 style={{ margin: '1.5rem 0 1rem', color: 'var(--text-secondary)' }}>T-Cell Epitope Matching</h4>
