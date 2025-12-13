@@ -500,14 +500,17 @@ function PredictPage() {
     const [validationErrors, setValidationErrors] = useState({})
 
     // Field validation rules
-    // Required fields: name (identification), age_at_hct, karnofsky_score, comorbidity_score (critical for model)
+    // Required fields: critical for ML model prediction
     const validationRules = {
         name: { required: true, minLength: 2, maxLength: 100, noNumbers: true },
         age_at_hct: { required: true, min: 0, max: 120, integer: true },
+        prim_disease_hct: { required: true },  // Primary disease - critical
+        dri_score: { required: true },  // Disease Risk Index - critical
+        karnofsky_score: { required: true, min: 0, max: 100, step: 10 },
+        conditioning_intensity: { required: true },  // Conditioning - critical
         donor_age: { min: 0, max: 120, integer: true },
         year_hct: { min: 1980, max: new Date().getFullYear() + 1, integer: true },
-        karnofsky_score: { required: true, min: 0, max: 100, step: 10 },
-        comorbidity_score: { required: true, min: 0, max: 10, integer: true },
+        comorbidity_score: { min: 0, max: 10, integer: true },
         hla_match_a_high: { min: 0, max: 2 },
         hla_match_b_high: { min: 0, max: 2 },
         hla_match_c_high: { min: 0, max: 2 },
@@ -635,7 +638,7 @@ function PredictPage() {
         const errors = {}
         let isValid = true
 
-        // Check required fields (critical for prediction)
+        // Check required fields (critical for ML prediction model)
         if (!formData.name || formData.name.trim() === '') {
             errors.name = 'Patient name is required'
             isValid = false
@@ -644,12 +647,20 @@ function PredictPage() {
             errors.age_at_hct = 'Age at HCT is required'
             isValid = false
         }
-        if (formData.karnofsky_score === '' || formData.karnofsky_score === null) {
-            errors.karnofsky_score = 'Karnofsky score is required for accurate prediction'
+        if (!formData.prim_disease_hct) {
+            errors.prim_disease_hct = 'Primary disease is required for prediction'
             isValid = false
         }
-        if (formData.comorbidity_score === '' || formData.comorbidity_score === null) {
-            errors.comorbidity_score = 'Comorbidity score is required for accurate prediction'
+        if (!formData.dri_score) {
+            errors.dri_score = 'Disease Risk Index is required for prediction'
+            isValid = false
+        }
+        if (formData.karnofsky_score === '' || formData.karnofsky_score === null) {
+            errors.karnofsky_score = 'Karnofsky score is required for prediction'
+            isValid = false
+        }
+        if (!formData.conditioning_intensity) {
+            errors.conditioning_intensity = 'Conditioning intensity is required for prediction'
             isValid = false
         }
 
@@ -714,7 +725,7 @@ function PredictPage() {
         const isRequired = validationRules[name]?.required
         return (
             <div className="form-group">
-                <label className="form-label">{label}{isRequired ? ' *' : ''}</label>
+                <label className="form-label">{label}{isRequired && <span style={{color: 'var(--error)'}}> *</span>}</label>
                 <input 
                     type={type} 
                     name={name} 
@@ -739,10 +750,6 @@ function PredictPage() {
                         {renderInput('name', 'Patient Name', 'text', { placeholder: 'Enter patient name', minLength: 2, maxLength: 100 })}
                         {renderInput('age_at_hct', 'Age at HCT', 'number', { min: 0, max: 120, placeholder: 'Years (0-120)' })}
                         {renderInput('year_hct', 'Year of HCT', 'number', { min: 1980, max: 2030, placeholder: '1980-2030' })}
-                        <div className="form-group">
-                            <label className="form-label">Year of HCT</label>
-                            <input type="number" name="year_hct" className="form-input" value={formData.year_hct} onChange={handleChange} min="1980" max="2030" />
-                        </div>
                         <div className="form-group">
                             <label className="form-label">Race Group</label>
                             <select name="race_group" className="form-input form-select" value={formData.race_group} onChange={handleChange}>
@@ -808,8 +815,8 @@ function PredictPage() {
                 return (
                     <div className="grid grid-2">
                         <div className="form-group">
-                            <label className="form-label">Primary Disease</label>
-                            <select name="prim_disease_hct" className="form-input form-select" value={formData.prim_disease_hct} onChange={handleChange}>
+                            <label className="form-label">Primary Disease <span style={{color: 'var(--error)'}}>*</span></label>
+                            <select name="prim_disease_hct" className={`form-input form-select ${validationErrors.prim_disease_hct ? 'input-error' : ''}`} value={formData.prim_disease_hct} onChange={handleChange}>
                                 <option value="">Select...</option>
                                 <option>AML</option>
                                 <option>ALL</option>
@@ -824,10 +831,11 @@ function PredictPage() {
                                 <option>Other leukemia</option>
                                 <option>Solid tumor</option>
                             </select>
+                            {validationErrors.prim_disease_hct && <span className="error-text">{validationErrors.prim_disease_hct}</span>}
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Disease Risk Index (DRI)</label>
-                            <select name="dri_score" className="form-input form-select" value={formData.dri_score} onChange={handleChange}>
+                            <label className="form-label">Disease Risk Index (DRI) <span style={{color: 'var(--error)'}}>*</span></label>
+                            <select name="dri_score" className={`form-input form-select ${validationErrors.dri_score ? 'input-error' : ''}`} value={formData.dri_score} onChange={handleChange}>
                                 <option value="">Select...</option>
                                 <option>Low</option>
                                 <option>Intermediate</option>
@@ -836,6 +844,7 @@ function PredictPage() {
                                 <option>N/A - non-malignant indication</option>
                                 <option>N/A - pediatric</option>
                             </select>
+                            {validationErrors.dri_score && <span className="error-text">{validationErrors.dri_score}</span>}
                         </div>
                         <div className="form-group">
                             <label className="form-label">Cytogenetic Score</label>
@@ -880,14 +889,15 @@ function PredictPage() {
                             </select>
                         </div>
                         <div className="form-group">
-                            <label className="form-label">Conditioning Intensity</label>
-                            <select name="conditioning_intensity" className="form-input form-select" value={formData.conditioning_intensity} onChange={handleChange}>
+                            <label className="form-label">Conditioning Intensity <span style={{color: 'var(--error)'}}>*</span></label>
+                            <select name="conditioning_intensity" className={`form-input form-select ${validationErrors.conditioning_intensity ? 'input-error' : ''}`} value={formData.conditioning_intensity} onChange={handleChange}>
                                 <option value="">Select...</option>
                                 <option>MAC</option>
                                 <option>RIC</option>
                                 <option>NMA</option>
                                 <option>TBD</option>
                             </select>
+                            {validationErrors.conditioning_intensity && <span className="error-text">{validationErrors.conditioning_intensity}</span>}
                         </div>
                         <div className="form-group">
                             <label className="form-label">TBI Status</label>
@@ -980,8 +990,9 @@ function PredictPage() {
                 return (
                     <div className="grid grid-2">
                         <div className="form-group">
-                            <label className="form-label">Karnofsky Performance Score</label>
-                            <input type="number" name="karnofsky_score" className="form-input" value={formData.karnofsky_score} onChange={handleChange} min="0" max="100" step="10" placeholder="0-100" />
+                            <label className="form-label">Karnofsky Performance Score <span style={{color: 'var(--error)'}}>*</span></label>
+                            <input type="number" name="karnofsky_score" className={`form-input ${validationErrors.karnofsky_score ? 'input-error' : ''}`} value={formData.karnofsky_score} onChange={handleChange} min="0" max="100" step="10" placeholder="0-100" />
+                            {validationErrors.karnofsky_score && <span className="error-text">{validationErrors.karnofsky_score}</span>}
                             <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>100 = Normal, no complaints</small>
                         </div>
                         <div className="form-group">
