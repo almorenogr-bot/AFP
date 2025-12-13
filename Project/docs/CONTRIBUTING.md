@@ -34,8 +34,8 @@ This project follows the [Contributor Covenant](https://www.contributor-covenant
 
 ```bash
 # Fork the repository on GitHub, then:
-git clone https://github.com/YOUR_USERNAME/AFP.git
-cd AFP/Project
+git clone https://github.com/SaiLord28/HCT_Survival_Equity_System_Analysis.git
+cd HCT_Survival_Equity_System_Analysis/Project
 ```
 
 ### Set Up Development Environment
