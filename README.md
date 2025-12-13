@@ -68,8 +68,11 @@ The **AI Service** is a specialized, containerized service that encapsulates the
 | Document | Description |
 |----------|-------------|
 | [Project README](Project/README.md) | Complete technical documentation |
-| [User Guide](Project/USER_GUIDE.md) | User stories, workflows, and screen guide |
-| [Architecture](Project/ARCHITECTURE.md) | Mermaid diagrams and system design |
+| [User Guide](Project/docs/USER_GUIDE.md) | User stories, workflows, and screen guide |
+| [Architecture](Project/docs/ARCHITECTURE.md) | Mermaid diagrams and system design |
+| [Deployment](Project/docs/DEPLOYMENT.md) | Production deployment guide |
+| [Contributing](Project/docs/CONTRIBUTING.md) | Contributor guidelines |
+| [Changelog](Project/docs/CHANGELOG.md) | Version history |
 | [AI Service](Project/ai_service/README.md) | ML pipeline technical details |
 | [Backend](Project/backend/README.md) | API endpoints and database models |
 | [Frontend](Project/frontend/README.md) | UI components and validation |
