@@ -646,6 +646,29 @@ async def get_prediction(
     )
 
 
+@app.delete("/predictions/{prediction_id}", tags=["Predictions"])
+async def delete_prediction(
+    prediction_id: str,
+    user: User = Depends(require_auth),
+    db: DBSession = Depends(get_db)
+):
+    """Delete prediction record."""
+    prediction = db.query(Prediction).filter(Prediction.id == prediction_id).first()
+    
+    if prediction is None:
+        raise HTTPException(status_code=404, detail="Prediction not found")
+    
+    if str(prediction.user_id) != str(user.id) and user.role != "admin":
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    log_audit(db, str(user.id), "delete", "prediction", str(prediction.id), {})
+    
+    db.delete(prediction)
+    db.commit()
+    
+    return {"status": "deleted"}
+
+
 # ==========================================
 # Dashboard Endpoint
 # ==========================================

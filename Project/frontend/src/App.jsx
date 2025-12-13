@@ -77,7 +77,15 @@ const api = {
 
     getPredictions: () => api.request('/predictions'),
 
-    getDashboard: () => api.request('/dashboard')
+    getDashboard: () => api.request('/dashboard'),
+
+    deletePatient: (patientId) => api.request(`/patients/${patientId}`, {
+        method: 'DELETE'
+    }),
+
+    deletePrediction: (predictionId) => api.request(`/predictions/${predictionId}`, {
+        method: 'DELETE'
+    })
 }
 
 // ==========================================
@@ -169,6 +177,9 @@ function Navbar() {
                     <div className="flex gap-2" style={{ alignItems: 'center' }}>
                         <Link to="/dashboard" className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>
                             Dashboard
+                        </Link>
+                        <Link to="/patients" className="btn btn-secondary" style={{ padding: '0.5rem 1rem' }}>
+                            Patients
                         </Link>
                         <Link to="/predict" className="btn btn-primary" style={{ padding: '0.5rem 1rem' }}>
                             New Prediction
@@ -1209,6 +1220,265 @@ function ProtectedRoute({ children }) {
 }
 
 // ==========================================
+// Patients Management Page
+// ==========================================
+
+function PatientsPage() {
+    const [patients, setPatients] = useState([])
+    const [predictions, setPredictions] = useState([])
+    const [loading, setLoading] = useState(true)
+    const [deleting, setDeleting] = useState(null)
+    const [confirmDelete, setConfirmDelete] = useState(null)
+    const [activeTab, setActiveTab] = useState('patients')
+    const [searchTerm, setSearchTerm] = useState('')
+
+    useEffect(() => {
+        loadData()
+    }, [])
+
+    const loadData = async () => {
+        setLoading(true)
+        try {
+            const [patientsData, predictionsData] = await Promise.all([
+                api.getPatients(),
+                api.getPredictions()
+            ])
+            setPatients(patientsData || [])
+            setPredictions(predictionsData || [])
+        } catch (err) {
+            console.error('Error loading data:', err)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleDeletePatient = async (patientId, patientName) => {
+        if (confirmDelete !== patientId) {
+            setConfirmDelete(patientId)
+            return
+        }
+
+        setDeleting(patientId)
+        try {
+            await api.deletePatient(patientId)
+            setPatients(prev => prev.filter(p => p.id !== patientId))
+            setPredictions(prev => prev.filter(p => p.patient_id !== patientId))
+            setConfirmDelete(null)
+        } catch (err) {
+            alert(`Error deleting patient: ${err.message}`)
+        } finally {
+            setDeleting(null)
+        }
+    }
+
+    const handleDeletePrediction = async (predictionId) => {
+        if (confirmDelete !== predictionId) {
+            setConfirmDelete(predictionId)
+            return
+        }
+
+        setDeleting(predictionId)
+        try {
+            await api.deletePrediction(predictionId)
+            setPredictions(prev => prev.filter(p => p.id !== predictionId))
+            setConfirmDelete(null)
+        } catch (err) {
+            alert(`Error deleting prediction: ${err.message}`)
+        } finally {
+            setDeleting(null)
+        }
+    }
+
+    const filteredPatients = patients.filter(p => 
+        p.name?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    const filteredPredictions = predictions.filter(p =>
+        p.patient_name?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+    if (loading) {
+        return (
+            <div className="page text-center">
+                <span className="spinner" style={{ margin: '3rem auto' }}></span>
+            </div>
+        )
+    }
+
+    return (
+        <div className="page">
+            <div className="container">
+                <h1 className="page-title">Manage Patients & Predictions</h1>
+                <p className="page-subtitle">View, search, and delete patient records</p>
+
+                {/* Search Bar */}
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <input
+                        type="text"
+                        placeholder="🔍 Search by patient name..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="form-control"
+                        style={{ maxWidth: '400px' }}
+                    />
+                </div>
+
+                {/* Tabs */}
+                <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+                    <button
+                        onClick={() => setActiveTab('patients')}
+                        className={`btn ${activeTab === 'patients' ? 'btn-primary' : 'btn-secondary'}`}
+                    >
+                        👥 Patients ({patients.length})
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('predictions')}
+                        className={`btn ${activeTab === 'predictions' ? 'btn-primary' : 'btn-secondary'}`}
+                    >
+                        📊 Predictions ({predictions.length})
+                    </button>
+                </div>
+
+                {/* Patients Tab */}
+                {activeTab === 'patients' && (
+                    <div className="card">
+                        <h3 className="card-title mb-3">Patient Records</h3>
+                        {filteredPatients.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {filteredPatients.map(patient => (
+                                    <div key={patient.id} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '1rem',
+                                        background: 'var(--bg-secondary)',
+                                        borderRadius: 'var(--radius-md)',
+                                        border: confirmDelete === patient.id ? '2px solid var(--danger)' : 'none'
+                                    }}>
+                                        <div>
+                                            <strong>{patient.name}</strong>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                Age: {patient.age_at_hct} | Karnofsky: {patient.karnofsky_score} | 
+                                                Created: {new Date(patient.created_at).toLocaleDateString()}
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleDeletePatient(patient.id, patient.name)}
+                                            disabled={deleting === patient.id}
+                                            className="btn"
+                                            style={{
+                                                background: confirmDelete === patient.id ? 'var(--danger)' : 'var(--bg-tertiary)',
+                                                color: confirmDelete === patient.id ? 'white' : 'var(--text-primary)',
+                                                padding: '0.5rem 1rem',
+                                                minWidth: '100px'
+                                            }}
+                                        >
+                                            {deleting === patient.id ? (
+                                                <span className="spinner" style={{ width: '16px', height: '16px' }}></span>
+                                            ) : confirmDelete === patient.id ? (
+                                                '⚠️ Confirm?'
+                                            ) : (
+                                                '🗑️ Delete'
+                                            )}
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-muted">
+                                {searchTerm ? 'No patients match your search' : 'No patients registered yet'}
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {/* Predictions Tab */}
+                {activeTab === 'predictions' && (
+                    <div className="card">
+                        <h3 className="card-title mb-3">Prediction History</h3>
+                        {filteredPredictions.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                                {filteredPredictions.map(pred => (
+                                    <div key={pred.id} style={{
+                                        display: 'flex',
+                                        justifyContent: 'space-between',
+                                        alignItems: 'center',
+                                        padding: '1rem',
+                                        background: 'var(--bg-secondary)',
+                                        borderRadius: 'var(--radius-md)',
+                                        border: confirmDelete === pred.id ? '2px solid var(--danger)' : 'none'
+                                    }}>
+                                        <div style={{ flex: 1 }}>
+                                            <strong>{pred.patient_name || 'Unknown'}</strong>
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                                                {new Date(pred.created_at).toLocaleString()}
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                            <span className={`risk-badge risk-${pred.risk_category?.toLowerCase()}`}>
+                                                {pred.risk_category} ({(pred.event_probability * 100).toFixed(0)}%)
+                                            </span>
+                                            <button
+                                                onClick={() => handleDeletePrediction(pred.id)}
+                                                disabled={deleting === pred.id}
+                                                className="btn"
+                                                style={{
+                                                    background: confirmDelete === pred.id ? 'var(--danger)' : 'var(--bg-tertiary)',
+                                                    color: confirmDelete === pred.id ? 'white' : 'var(--text-primary)',
+                                                    padding: '0.5rem 1rem',
+                                                    minWidth: '100px'
+                                                }}
+                                            >
+                                                {deleting === pred.id ? (
+                                                    <span className="spinner" style={{ width: '16px', height: '16px' }}></span>
+                                                ) : confirmDelete === pred.id ? (
+                                                    '⚠️ Confirm?'
+                                                ) : (
+                                                    '🗑️ Delete'
+                                                )}
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <p className="text-muted">
+                                {searchTerm ? 'No predictions match your search' : 'No predictions made yet'}
+                            </p>
+                        )}
+                    </div>
+                )}
+
+                {/* Cancel confirmation on click outside */}
+                {confirmDelete && (
+                    <div 
+                        style={{ 
+                            position: 'fixed', 
+                            bottom: '2rem', 
+                            left: '50%', 
+                            transform: 'translateX(-50%)',
+                            background: 'var(--bg-primary)',
+                            padding: '1rem 2rem',
+                            borderRadius: 'var(--radius-lg)',
+                            boxShadow: 'var(--shadow-lg)',
+                            border: '1px solid var(--glass-border)'
+                        }}
+                    >
+                        <span style={{ marginRight: '1rem' }}>Click the button again to confirm deletion</span>
+                        <button 
+                            onClick={() => setConfirmDelete(null)}
+                            className="btn btn-secondary"
+                        >
+                            Cancel
+                        </button>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
+
+// ==========================================
 // App
 // ==========================================
 
@@ -1223,6 +1493,11 @@ function App() {
                         <Route path="/dashboard" element={
                             <ProtectedRoute>
                                 <Dashboard />
+                            </ProtectedRoute>
+                        } />
+                        <Route path="/patients" element={
+                            <ProtectedRoute>
+                                <PatientsPage />
                             </ProtectedRoute>
                         } />
                         <Route path="/predict" element={
